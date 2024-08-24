@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+</head>
+
+<style>
+    body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWzN6JodGoawpA5dFUCrg1ysPn8BYKjMmcgg&s");
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.card {
+    background-color:transparent;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    background-color: transparent;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.content {
+    padding: 20px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.otp-form {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+input {
+    width: calc(100% - 30px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+}
+
+.success-message {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    color: #4CAF50;
+}
+
+.error-message {
+    color: #e74c3c;
+    margin-top: 10px;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.success-message p {
+    margin: 10px 0;
+}
+
+.otp-display {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.otp-text {
+    font-size: 18px;
+    margin: 0;
+}
+
+input:disabled {
+    background-color: #f2f2f2;
+    color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+.timer {
+    margin-top: 10px;
+    font-size: 14px;
+}
+</style>
+
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1 style="color:Black">
+                Indian Railways
+            </h1>
+            <h2 style="color:black">
+                OTP Verification
+            </h2>
+        </div>
+        <div div="content" id="content">
+            <button id="generateBtn" onclick="OTPFn()">
+                Generate OTP
+            </button>
+            </div>
+            <div id="otpForm" class="otp-form">
+                <input type="text" id="userOTP" placeholder="Enter OTP">
+                <button onclick="OTPVerifyFn()">
+                    Verify
+                </button>
+            </div>
+            <div id="successMessage" class="success-message">
+                <i class="fas fa-check"></i>
+                <p>Congratulations! OTP is Verified!
+                    Your ticket are booked.
+                    We will send your tickets on your register e-mail id & Mobile number.
+                </p>
+        
+              
+            </div>
+            
+            
+            <div id="errorMessage" class="error-message"></div>
+            <div id="timer" class="timer"></div>
+            
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let otpGen;
+let timer;
+let secondsRemaining = 60;
+
+function OTPFn() {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    clearFn();
+    otpGen = Math.floor(1000 + Math.random() * 9000);
+    const temp = document.getElementById('content');
+    const showOtp = document.createElement('div');
+    showOtp.classList.add('otp-display');
+    showOtp.innerHTML = `
+        <p class="otp-text">Generated OTP: 
+            <span>${otpGen}</span>
+        </p>`;
+    temp.appendChild(showOtp);
+    document.getElementById('otpForm').style.display = 'flex';
+    startTimer();
+}
+
+function clearFn() {
+    const prevOtp = document.querySelector('.otp-display');
+    if (prevOtp) {
+        prevOtp.remove();
+    }
+    resetTimer();
+    document.getElementById('errorMessage').innerText = '';
+    enableInputField();
+}
+
+function OTPVerifyFn() {
+    const userOtp = document.getElementById('userOTP').value;
+    if (userOtp === "") {
+        alert("Please enter OTP.");
+        return;
+    }
+    const enterOtp = parseInt(userOtp);
+    if (!isNaN(enterOtp)) {
+        if (secondsRemaining > 0) {
+            if (enterOtp === otpGen) {
+                showMsgFn();
+                document.getElementById('generateBtn').disabled = false;
+                resetTimer();
+                enableInputField();
+            } else {
+                document.getElementById('errorMessage').innerText = 'Invalid OTP. Please try again.';
+            }
+        } else {
+            document.getElementById('errorMessage').innerText = 'OTP Expired. Please generate a new OTP.';
+            resetTimer();
+        }
+    } else {
+        alert("Invalid OTP. Please try again.");
+    }
+}
+
+function showMsgFn() {
+    const successMessage = document.getElementById('successMessage');
+    successMessage.style.animation = 'fadeIn 1s forwards';
+    successMessage.style.display = 'flex';
+    setTimeout(() => {
+        successMessage.style.display = 'none';
+    }, 3000);
+}
+
+function startTimer() {
+    timer = setInterval(function () {
+        if (secondsRemaining <= 0) {
+            clearInterval(timer);
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('errorMessage').innerText = 'OTP Expired. Please generate a new OTP.';
+            resetTimer();
+            disableInputField();
+        } else {
+            document.getElementById('timer').innerText = `Time Remaining: ${secondsRemaining} seconds`;
+            secondsRemaining--;
+        }
+    }, 1000);
+}
+
+function resetTimer() {
+    clearInterval(timer);
+    document.getElementById('timer').innerText = '';
+    secondsRemaining = 10;
+}
+
+function disableInputField() {
+    document.getElementById('userOTP').disabled = true;
+}
+
+function enableInputField() {
+    document.getElementById('userOTP').disabled = false;
+}
+
+function clearFields() {
+    document.getElementById('userOTP').value = '';
+    clearFn();
+}
+
+</script>
+
+
+</body>
+
+</html>
